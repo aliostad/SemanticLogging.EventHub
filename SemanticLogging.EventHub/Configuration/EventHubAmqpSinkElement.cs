@@ -26,6 +26,7 @@ namespace SemanticLogging.EventHub.Configuration
 
             var subject = new EventEntrySubject();
             subject.LogToEventHubUsingAmqp(
+                null,
                 (string)element.Attribute("eventHubConnectionString"),
                 (string)element.Attribute("eventHubName"),
                 element.Attribute("bufferingIntervalInSeconds").ToTimeSpan(),

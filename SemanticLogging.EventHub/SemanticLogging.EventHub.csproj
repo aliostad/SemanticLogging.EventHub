@@ -68,6 +68,7 @@
     <Compile Include="EventHubClientImp.cs" />
     <Compile Include="EventHubHttpLog.cs" />
     <Compile Include="EventHubHttpSink.cs" />
+    <Compile Include="ExtendedEventEntry.cs" />
     <Compile Include="HttpClientImp.cs" />
     <Compile Include="IEventHubClient.cs" />
     <Compile Include="IHttpClient.cs" />

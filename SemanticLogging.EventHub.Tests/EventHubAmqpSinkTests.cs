@@ -21,13 +21,13 @@ namespace SemanticLogging.EventHub.Tests
         [TestMethod]
         public void ShouldFailForNullConnectionString()
         {
-            AssertEx.Throws<ArgumentNullException>(() => new EventHubAmqpSink(null, "eventHubName", Buffering.DefaultBufferingInterval, Buffering.DefaultBufferingCount, Buffering.DefaultMaxBufferSize, TimeSpan.Zero));
+            AssertEx.Throws<ArgumentNullException>(() => new EventHubAmqpSink(null, null, null, null, "eventHubName", Buffering.DefaultBufferingInterval, Buffering.DefaultBufferingCount, Buffering.DefaultMaxBufferSize, TimeSpan.Zero));
         }
 
         [TestMethod]
         public void ShouldFailForNullEventHubName()
         {
-            AssertEx.Throws<ArgumentNullException>(() => new EventHubAmqpSink("connString", null, Buffering.DefaultBufferingInterval, Buffering.DefaultBufferingCount, Buffering.DefaultMaxBufferSize, TimeSpan.Zero));
+            AssertEx.Throws<ArgumentNullException>(() => new EventHubAmqpSink(null, null, null, "connString", null, Buffering.DefaultBufferingInterval, Buffering.DefaultBufferingCount, Buffering.DefaultMaxBufferSize, TimeSpan.Zero));
         }
 
         [TestMethod]

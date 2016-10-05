@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Practices.EnterpriseLibrary.SemanticLogging;
+using Microsoft.Practices.EnterpriseLibrary.SemanticLogging.Schema;
 using Microsoft.Practices.EnterpriseLibrary.SemanticLogging.Sinks;
 using Microsoft.Practices.EnterpriseLibrary.SemanticLogging.Utility;
 using Microsoft.ServiceBus.Messaging;
@@ -22,6 +23,9 @@ namespace SemanticLogging.EventHub
         private TimeSpan onCompletedTimeout;
         private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         private bool useAutomaticSizedBuffer;
+        private string _instanceName;
+        private string _roleName;
+        private string _deploymentId;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EventHubAmqpSink" /> class.
@@ -37,8 +41,21 @@ namespace SemanticLogging.EventHub
         /// If <see langword="null"/> is specified, then the call will block indefinitely until the flush operation finishes.</param>
         /// <param name="partitionKey">PartitionKey is optional. If no partition key is supplied the log messages are sent to eventhub 
         /// and distributed to various partitions in a round robin manner.</param>
-        public EventHubAmqpSink(string eventHubConnectionString, string eventHubName, TimeSpan bufferingInterval, int bufferingCount, int maxBufferSize, TimeSpan onCompletedTimeout, string partitionKey = null)
+        public EventHubAmqpSink(
+            string instanceName,
+            string roleName,
+            string deploymentId,
+            string eventHubConnectionString, 
+            string eventHubName, 
+            TimeSpan bufferingInterval, 
+            int bufferingCount, 
+            int maxBufferSize, 
+            TimeSpan onCompletedTimeout, 
+            string partitionKey = null)
         {
+            _deploymentId = deploymentId;
+            _roleName = roleName;
+            _instanceName = instanceName;
             Guard.ArgumentNotNullOrEmpty(eventHubConnectionString, "eventHubConnectionString");
             Guard.ArgumentNotNullOrEmpty(eventHubName, "eventHubName");
 
@@ -151,10 +168,20 @@ namespace SemanticLogging.EventHub
             }
         }
 
+        private ExtendedEventEntry GetExtendedEventEntry(EventEntry entry)
+        {
+            return new ExtendedEventEntry(entry)
+            {
+                InstanceName = _instanceName,
+                DeploymentId = _deploymentId,
+                RoleName = _roleName
+            };
+        }
+
         private async Task<int> SendManualSizedBatchAsync(ICollection<EventEntry> collection)
         {
             var events = collection.Select(entry =>
-                        new EventData(Encoding.Default.GetBytes(JsonConvert.SerializeObject(entry)))
+                        new EventData(Encoding.Default.GetBytes(JsonConvert.SerializeObject(GetExtendedEventEntry(entry) )))
                         {
                             PartitionKey = partitionKey
                         });
@@ -170,7 +197,8 @@ namespace SemanticLogging.EventHub
             long totalSerializedSizeInBytes = 0;
             const long maxMessageSizeInBytes = 250000;
 
-            foreach (var eventData in collection.Select(eventEntry => new EventData(Encoding.Default.GetBytes(JsonConvert.SerializeObject(eventEntry)))
+            foreach (var eventData in collection.Select(eventEntry => new EventData(Encoding.Default.GetBytes(JsonConvert.SerializeObject(
+                GetExtendedEventEntry(eventEntry))))
             {
                 PartitionKey = partitionKey
             }))

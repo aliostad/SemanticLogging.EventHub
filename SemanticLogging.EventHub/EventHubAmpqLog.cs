@@ -29,9 +29,23 @@ namespace SemanticLogging.EventHub
         /// <returns>
         /// A subscription to the sink that can be disposed to unsubscribe the sink and dispose it, or to get access to the sink instance.
         /// </returns>
-        public static SinkSubscription<EventHubAmqpSink> LogToEventHubUsingAmqp(this IObservable<EventEntry> eventStream, string eventHubConnectionString, string eventHubName, TimeSpan? bufferingInterval = null, int bufferingCount = Buffering.DefaultBufferingCount, TimeSpan? onCompletedTimeout = null, int maxBufferSize = Buffering.DefaultMaxBufferSize, string partitionKey = null)
+        public static SinkSubscription<EventHubAmqpSink> LogToEventHubUsingAmqp(
+            this IObservable<EventEntry> eventStream, 
+            string instanceName,
+            string eventHubConnectionString, 
+            string eventHubName, 
+            TimeSpan? bufferingInterval = null, 
+            int bufferingCount = Buffering.DefaultBufferingCount, 
+            TimeSpan? onCompletedTimeout = null, 
+            int maxBufferSize = Buffering.DefaultMaxBufferSize, 
+            string partitionKey = null,
+            string roleName = null,
+            string deploymentId = null)
         {
             var sink = new EventHubAmqpSink(
+                instanceName,
+                roleName,
+                deploymentId,
                 eventHubConnectionString,
                 eventHubName,
                 bufferingInterval ?? Buffering.DefaultBufferingInterval,
@@ -61,10 +75,20 @@ namespace SemanticLogging.EventHub
         /// <returns>
         /// An event listener that uses <see cref="EventHubAmqpSink" /> to log events.
         /// </returns>
-        public static EventListener CreateListener(string eventHubConnectionString, string eventHubName, TimeSpan? bufferingInterval = null, int bufferingCount = Buffering.DefaultBufferingCount, TimeSpan? listenerDisposeTimeout = null, int maxBufferSize = Buffering.DefaultMaxBufferSize, string partitionKey = null)
+        public static EventListener CreateListener(
+            string instanceName,
+            string eventHubConnectionString, 
+            string eventHubName, 
+            TimeSpan? bufferingInterval = null, 
+            int bufferingCount = Buffering.DefaultBufferingCount, 
+            TimeSpan? listenerDisposeTimeout = null, 
+            int maxBufferSize = Buffering.DefaultMaxBufferSize, 
+            string partitionKey = null,
+            string roleName = null,
+            string deploymentId = null)
         {
             var listener = new ObservableEventListener();
-            listener.LogToEventHubUsingAmqp(eventHubConnectionString, eventHubName, bufferingInterval, bufferingCount, listenerDisposeTimeout, maxBufferSize, partitionKey);
+            listener.LogToEventHubUsingAmqp(instanceName, eventHubConnectionString, eventHubName, bufferingInterval, bufferingCount, listenerDisposeTimeout, maxBufferSize, partitionKey, roleName, deploymentId);
             return listener;
         }
     }
